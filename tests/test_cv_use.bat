@@ -1,0 +1,2 @@
+detectFace_dlib_useCV.exe image\2007_007763.jpg image\2008_001009.jpg image\2008_001322.jpg image\2008_002079.jpg image\2008_002470.jpg image\2008_002506.jpg image\2008_004176.jpg image\2008_007676.jpg image\2009_004587.jpg image\bald_guys.jpg image\dogs.jpg
+del z*.bmp
