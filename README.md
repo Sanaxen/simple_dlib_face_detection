@@ -1,6 +1,10 @@
 # simple_dlib_face_detection  
 # Face recognition by dlib  
-**Dlib, OpenCV No installation required**  Builtable with Visual Studio 2012 C ++ (see example)  
+**Dlib No installation required**  Builtable with Visual Studio 2012 C ++ (see example)  
+
+**Note)**  
+
+However, 'Microsoft Visual C++ 2015 Redistributable' is required for execution  
 
 With **simple_dlib_face_detection.dll** recognize the face by dlib.  
 However, Visual Studio 2015 is required to rebuild **simple_dlib_face_detection.dll**.  
