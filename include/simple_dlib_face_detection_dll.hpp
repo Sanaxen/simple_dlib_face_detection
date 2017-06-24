@@ -40,6 +40,7 @@ typedef void*(WINAPI *dlib_delete_primitive_image)(primitive_image_t& p);
 
 typedef void*(WINAPI *dlib_delete_dlibImg)(void* dlibImg);
 
+
 typedef int(WINAPI *dlib_ToBMP)(const char* filename, char* newfile);
 
 typedef void*(WINAPI *dlib_get_frontal_face_detector_ptr)();
@@ -52,18 +53,29 @@ typedef primitive_image_t(WINAPI *dlib_dlibImage2primitive_image)(void* img_p, c
 
 typedef void*(WINAPI *dlib_primitive_image2dlibImage)(primitive_image_t& image);
 
-typedef int(WINAPI *dlib_face_detector)(primitive_image_t& image, void* detector_ptr, std::vector<rectangle_2d_t>& rectangleList);
+typedef int(WINAPI *dlib_face_detector)(void* win_p, primitive_image_t& image, void* detector_ptr, std::vector<rectangle_2d_t>& rectangleList);
+
+typedef int(WINAPI *dlib_face_detector_cv)(void* win_p, void* cvMat_image, void* detector_ptr, std::vector<rectangle_2d_t>& rectangleList, void* shape_predictor_model);
 
 typedef void*(WINAPI *dlib_create_image_window)();
 
 typedef void(WINAPI *dlib_close_image_window)(void* win_p);
 
+
 typedef void(WINAPI *dlib_set_image_window)(void*win_p, void* dlib_img);
 
 typedef void(WINAPI *dlib_resize_image_window)(void*win_p, int w, int h);
 
+typedef void*(WINAPI *dlib_new_shape_predictor)(char* shape_predictor_data);
+
+typedef void(WINAPI *dlib_delete_shape_predictor)(void* model);
+
+typedef void(WINAPI *dlib_delete_full_object_detection_shape)(void* shape);
+
+
 #define DNN_DEF_FUNC(f)	dlib_ ## f f ## _dlib = NULL;
 #define DNN_FUNC(f)	f ## _dlib = (dlib_ ## f)GetProcAddress(__hModule, # f);if ( f ## _dlib == NULL ) printf("load %s error.\n", #f);
+
 
 DNN_DEF_FUNC(primitive_image_clone);
 DNN_DEF_FUNC(delete_primitive_image);
@@ -75,6 +87,10 @@ DNN_DEF_FUNC(save_primitive_image);
 DNN_DEF_FUNC(dlibImage2primitive_image);
 DNN_DEF_FUNC(primitive_image2dlibImage);
 DNN_DEF_FUNC(face_detector);
+DNN_DEF_FUNC(face_detector_cv);
+DNN_DEF_FUNC(new_shape_predictor);
+DNN_DEF_FUNC(delete_shape_predictor);
+DNN_DEF_FUNC(delete_full_object_detection_shape);
 DNN_DEF_FUNC(create_image_window);
 DNN_DEF_FUNC(close_image_window);
 DNN_DEF_FUNC(set_image_window);
@@ -108,6 +124,10 @@ inline int simple_dlib_init(const char* this_dll)
 	DNN_FUNC(dlibImage2primitive_image);
 	DNN_FUNC(primitive_image2dlibImage);
 	DNN_FUNC(face_detector);
+	DNN_FUNC(face_detector_cv);
+	DNN_FUNC(new_shape_predictor);
+	DNN_FUNC(delete_shape_predictor);
+	DNN_FUNC(delete_full_object_detection_shape);
 	DNN_FUNC(create_image_window);
 	DNN_FUNC(close_image_window);
 	DNN_FUNC(set_image_window);

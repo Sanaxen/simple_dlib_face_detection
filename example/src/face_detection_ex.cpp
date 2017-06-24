@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 #endif
 			std::vector<rectangle_2d_t> rectList;
 
-			face_detector_dlib(Img, (void*)frontal_face_detector_ptr, rectList);
+			face_detector_dlib(0, Img, (void*)frontal_face_detector_ptr, rectList);
 			cout << "Number of faces detected: " << rectList.size() << endl;
 
 

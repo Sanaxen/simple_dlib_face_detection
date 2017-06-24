@@ -4,6 +4,7 @@
 #define USE_OPENCV
 #include "../../include/util/simple_dlib_face_detection_util.hpp"
 
+#define USE_OPENCV_WINDOW	0
 int main(int argh, char* argv[])
 {
 	simple_dlib_init("simple_dlib_face_detection.dll");
@@ -20,38 +21,53 @@ int main(int argh, char* argv[])
 		return -1;
 	}
 
+#if USE_OPENCV_WINDOW
+	void* win = 0;
+#else
+	void* win = create_image_window_dlib();
+	resize_image_window_dlib(win, 640, 480);
+#endif
+
+#if USE_OPENCV_WINDOW
 	cv::Size cap_size(640*1.2, 480*1.2);
 	cap.set(CV_CAP_PROP_FRAME_WIDTH, cap_size.width);
 	cap.set(CV_CAP_PROP_FRAME_HEIGHT, cap_size.height);
 	//cap.set(CV_CAP_PROP_FPS, 30);
+#endif
 
 	void* frontal_face_detector_ptr = get_frontal_face_detector_ptr_dlib();
 
-#if 0
-#if 0
-	cv::CascadeClassifier cascade("C:\\dev\opencv-3.1.0\\sources\\data\\hogcascades\\hogcascade_pedestrians.xml");
-#else	
-	cv::HOGDescriptor hog;
-	hog.setSVMDetector(cv::HOGDescriptor::getDefaultPeopleDetector());
-#endif
-#endif
+	void* shape_predictor_model = 0;
+	const char* model = "shape_predictor_68_face_landmarks.dat";
+	FILE* fp = fopen( model, "r") ;
+	if ( fp == NULL )
+	{
+		printf("\"shape_predictor_68_face_landmarks.dat\" not found.\n");
+		printf("download->http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2\n");
+	}else
+	{
+		fclose(fp);
+		shape_predictor_model = new_shape_predictor_dlib( (char*)model);
+	}
+
 
 	while (1)//無限ループ
 	{
 		cv::Mat frame;
 		cap >> frame; // get a new frame from camera
 
-					  //
-					  //取得したフレーム画像に対して，クレースケール変換や2値化などの処理を書き込む．
-					  //
-
 		std::vector<rectangle_2d_t> rectList;
 
+#if 10
+		const int faceNum = face_detector_cv_dlib(win, (void*)&frame, (void*)frontal_face_detector_ptr, rectList, shape_predictor_model);
+#else
 		primitive_image_t& frame_img = cvmat_to_pixcels(frame);
 
-		int faceNum = face_detector_dlib(frame_img, (void*)frontal_face_detector_ptr, rectList);
-		delete [] frame_img.pixcels;
+		const int faceNum = face_detector_dlib(win, frame_img, (void*)frontal_face_detector_ptr, rectList);
+		delete[] frame_img.pixcels;
+#endif
 
+		if ( win ) resize_image_window_dlib(win, 640, 480);
 		if (faceNum)
 		{
 			const int rectList_sz = rectList.size();
@@ -71,31 +87,22 @@ int main(int argh, char* argv[])
 			}
 		}
 
-		std::vector<cv::Rect> people;
-#if 0
-#if 0
-		cascade.detectMultiScale(frame, people, 1.1, 2);
-#else
-		hog.detectMultiScale(frame, people, 0, cv::Size(8, 8), cv::Size(16, 16), 1.05, 2);
-#endif
-#endif
 
-		for (int j = 0; j < people.size(); j++)
+		if (!win)
 		{
-			cv::rectangle(frame, people[j].tl(), people[j].br(), cv::Scalar(255, 0, 0), 1, CV_AA);
+			cv::imshow("window", frame);//画像を表示．
 
-		}
-		cv::imshow("window", frame);//画像を表示．
+			int key = cv::waitKey(1);
+			if (key == 113)//qボタンが押されたとき
+			{
+				break;//whileループから抜ける．
+			}
+			else if (key == 115)//sが押されたとき
+			{
+				//フレーム画像を保存する．
+				//cv::imwrite("img.png", frame);
+			}
 
-		int key = cv::waitKey(1);
-		if (key == 113)//qボタンが押されたとき
-		{
-			break;//whileループから抜ける．
-		}
-		else if (key == 115)//sが押されたとき
-		{
-			//フレーム画像を保存する．
-			//cv::imwrite("img.png", frame);
 		}
 
 	}

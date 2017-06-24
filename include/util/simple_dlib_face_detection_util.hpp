@@ -6,21 +6,21 @@ primitive_image_t cvmat_to_pixcels(cv::Mat& Img)
 {
 	primitive_image_t p;
 	p.pixcels = new unsigned char[Img.rows*Img.cols*Img.channels()];
+
+	const int sz = Img.rows*Img.cols;
+	const int channels = Img.channels();
+
 #pragma omp parallel for
-	for (int i = 0; i < Img.rows; i++)
+	for (int i = 0; i < sz; i++)
 	{
-		for (int j = 0; j < Img.cols; j++)
-		{
-			int pos = (i*Img.cols + j);
-			for (int c = 0; c < Img.channels(); c++)
-			{
-				p.pixcels[Img.channels()*pos + Img.channels() - c - 1] = Img.data[i * Img.step + j * Img.elemSize() + c];
-			}
-		}
+		const cv::Vec3b& pix = Img.at<cv::Vec3b>(i);
+		p.pixcels[channels*i + channels - 0 - 1] = pix[0];
+		p.pixcels[channels*i + channels - 1 - 1] = pix[1];
+		p.pixcels[channels*i + channels - 2 - 1] = pix[2];
 	}
 	p.x = Img.cols;
 	p.y = Img.rows;
-	p.channels = Img.channels();
+	p.channels = channels;
 	return p;
 }
 
@@ -28,17 +28,15 @@ cv::Mat pixcels_to_cvmat(primitive_image_t& p)
 {
 	cv::Mat Img(p.y, p.x, CV_8UC(p.channels));
 
+	const int sz = Img.rows*Img.cols;
+	const int channels = Img.channels();
 #pragma omp parallel for
-	for (int i = 0; i < Img.rows; i++)
+	for (int i = 0; i < sz; i++)
 	{
-		for (int j = 0; j < Img.cols; j++)
-		{
-			int pos = (i*Img.cols + j);
-			for (int c = 0; c < Img.channels(); c++)
-			{
-				Img.data[i * Img.step + j * Img.elemSize() + c] = p.pixcels[Img.channels()*pos + Img.channels() - c - 1];
-			}
-		}
+		cv::Vec3b& pix = Img.at<cv::Vec3b>(i);
+		pix[0] = p.pixcels[channels*i + channels - 0 - 1];
+		pix[1] = p.pixcels[channels*i + channels - 1 - 1];
+		pix[2] = p.pixcels[channels*i + channels - 2 - 1];
 	}
 	return Img;
 }
